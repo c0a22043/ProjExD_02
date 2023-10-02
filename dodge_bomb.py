@@ -22,6 +22,15 @@ def main():
 
     clock = pg.time.Clock()
 
+    kk_rect = kk_img.get_rect(topleft=(900, 400))
+
+    move_dict = {
+        pg.K_UP: (0, -5),    # 上矢印
+        pg.K_DOWN: (0, 5),   # 下矢印
+        pg.K_LEFT: (-5, 0),  # 左矢印
+        pg.K_RIGHT: (5, 0)   # 右矢印
+    }
+
     vx, vy = 5, 5
 
     tmr = 0
@@ -29,13 +38,26 @@ def main():
         for event in pg.event.get():
             if event.type == pg.QUIT: 
                 return
+            
+        key_lst = pg.key.get_pressed()
+
+        total_movement = [0, 0]
+        for key, movement in move_dict.items():
+            if key_lst[key]:
+                total_movement[0] += movement[0]
+                total_movement[1] += movement[1]
+
+        kk_rect.move_ip(*total_movement)
+
+        kk_rect.clamp_ip(screen.get_rect())
+
         bomb_rect.move_ip(vx, vy)
 
         if not screen.get_rect().colliderect(bomb_rect):
             bomb_rect.topleft = (random.randint(0, WIDTH - 20), random.randint(0, HEIGHT - 20))
 
         screen.blit(bg_img, [0, 0])
-        screen.blit(kk_img, [900, 400])
+        screen.blit(kk_img, kk_rect.topleft)
 
         screen.blit(bomb_surface, bomb_rect)
 
