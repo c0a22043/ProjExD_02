@@ -6,6 +6,15 @@ import random
 WIDTH, HEIGHT = 1600, 900
 
 
+def is_inside_screen(rect):
+    """Rectが画面内にあるかどうかを判定する関数."""
+    return (
+        0 <= rect.left <= WIDTH and
+        0 <= rect.right <= WIDTH and
+        0 <= rect.top <= HEIGHT and
+        0 <= rect.bottom <= HEIGHT
+    )
+
 def main():
     pg.display.set_caption("逃げろ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
@@ -49,12 +58,17 @@ def main():
 
         kk_rect.move_ip(*total_movement)
 
-        kk_rect.clamp_ip(screen.get_rect())
+       
+
+        if not is_inside_screen(kk_rect):
+            kk_rect.move_ip(*[-movement for movement in total_movement])
 
         bomb_rect.move_ip(vx, vy)
 
-        if not screen.get_rect().colliderect(bomb_rect):
-            bomb_rect.topleft = (random.randint(0, WIDTH - 20), random.randint(0, HEIGHT - 20))
+        if not is_inside_screen(bomb_rect):
+            vx = -vx
+            vy = -vy
+            bomb_rect.move_ip(vx, vy)
 
         screen.blit(bg_img, [0, 0])
         screen.blit(kk_img, kk_rect.topleft)
