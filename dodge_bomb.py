@@ -5,7 +5,6 @@ import random
 
 WIDTH, HEIGHT = 1600, 900
 
-
 def is_inside_screen(rect):
     """Rectが画面内にあるかどうかを判定する関数."""
     return (
@@ -14,6 +13,7 @@ def is_inside_screen(rect):
         0 <= rect.top <= HEIGHT and
         0 <= rect.bottom <= HEIGHT
     )
+
 
 def main():
     pg.display.set_caption("逃げろ！こうかとん")
@@ -37,7 +37,7 @@ def main():
 
     #bomb_surface.set_colorkey((0, 0, 0))
 
-    bomb_rect = bomb_img.get_rect(topleft=(random.randint(0, WIDTH-bomb_img.get_width()), random.randint(0, HEIGHT - bomb_img.get_height())))
+    bomb_rect = bomb_img.get_rect(topleft=(random.randint(0, WIDTH - bomb_img.get_width()), random.randint(0, HEIGHT - bomb_img.get_height())))
 
     clock = pg.time.Clock()
 
@@ -73,11 +73,20 @@ def main():
         if not is_inside_screen(kk_rect):
             kk_rect.move_ip(*[-movement for movement in total_movement])
 
-        # 加速度と拡大爆弾Surfaceを選択
-        avx, avy = vx * accs[min(tmr // 500, 9)], vy * accs[min(tmr // 500, 9)]
-        bomb_img = bomb_imgs[min(tmr // 500, 9)]
+        # 爆弾がこうかとんに近づくように移動する
+        diff_vector = [kk_rect.x - bomb_rect.x, kk_rect.y - bomb_rect.y]
 
-        bomb_rect.move_ip(avx, avy)
+        #   ベクトルのノルムが√50になるように正規化
+        norm = (diff_vector[0]**2 + diff_vector[1]**2)**0.5
+        normalized_vector = [diff_vector[0] / norm, diff_vector[1] / norm]
+
+        # 爆弾とこうかとんの距離が500未満だったら，慣性として前の方向に移動させる
+        if norm < 500:
+            avx, avy = vx * accs[min(tmr // 500, 9)] * normalized_vector[0], vy * accs[min(tmr // 500, 9)] * normalized_vector[1]
+            bomb_rect.move_ip(avx, avy)
+        else:
+            avx, avy = vx * accs[min(tmr // 500, 9)], vy * accs[min(tmr // 500, 9)]
+            bomb_rect.move_ip(avx, avy)
 
         if not is_inside_screen(bomb_rect):
             vx = -vx
