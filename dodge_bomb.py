@@ -15,12 +15,21 @@ def is_inside_screen(rect):
         0 <= rect.bottom <= HEIGHT
     )
 
+def load_images():
+    kk_img = pg.image.load("ex02/fig/3.png")
+    kk_img_right = pg.transform.rotozoom(kk_img, 0, 2.0)
+    kk_img_left = pg.transform.flip(kk_img_right, True, False)
+    return kk_img_right, kk_img_left
+
 def main():
     pg.display.set_caption("逃げろ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
     bg_img = pg.image.load("ex02/fig/pg_bg.jpg")
     kk_img = pg.image.load("ex02/fig/3.png")
     kk_img = pg.transform.rotozoom(kk_img, 0, 2.0)
+
+    kk_img_right, kk_img_left = load_images()
+    kk_img = kk_img_right
 
     bomb_surface = pg.Surface((20, 20), pg.SRCALPHA)
     pg.draw.circle(bomb_surface, (255, 0, 0), (10, 10), 10)
@@ -55,6 +64,11 @@ def main():
             if key_lst[key]:
                 total_movement[0] += movement[0]
                 total_movement[1] += movement[1]
+
+        if total_movement[0] < 0:
+            kk_img = kk_img_right
+        elif total_movement[0] > 0:
+            kk_img = kk_img_left
 
         kk_rect.move_ip(*total_movement)
 
