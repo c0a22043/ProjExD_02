@@ -21,11 +21,18 @@ def main():
     bomb_rect = bomb_surface.get_rect(topleft=(random.randint(0, WIDTH-20), random.randint(0, HEIGHT-20)))
 
     clock = pg.time.Clock()
+
+    vx, vy = 5, 5
+
     tmr = 0
     while True:
         for event in pg.event.get():
             if event.type == pg.QUIT: 
                 return
+        bomb_rect.move_ip(vx, vy)
+
+        if not screen.get_rect().colliderect(bomb_rect):
+            bomb_rect.topleft = (random.randint(0, WIDTH - 20), random.randint(0, HEIGHT - 20))
 
         screen.blit(bg_img, [0, 0])
         screen.blit(kk_img, [900, 400])
@@ -34,7 +41,7 @@ def main():
 
         pg.display.update()
         tmr += 1
-        clock.tick(10)
+        clock.tick(50)
 
 
 if __name__ == "__main__":
