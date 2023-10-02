@@ -58,8 +58,6 @@ def main():
 
         kk_rect.move_ip(*total_movement)
 
-       
-
         if not is_inside_screen(kk_rect):
             kk_rect.move_ip(*[-movement for movement in total_movement])
 
@@ -69,6 +67,9 @@ def main():
             vx = -vx
             vy = -vy
             bomb_rect.move_ip(vx, vy)
+        
+        if kk_rect.colliderect(bomb_rect):
+            return
 
         screen.blit(bg_img, [0, 0])
         screen.blit(kk_img, kk_rect.topleft)
