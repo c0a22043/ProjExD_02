@@ -64,6 +64,8 @@ def main():
     vx, vy = 5, 5
     accs = [a for a in range(1, 11)]
 
+    font = pg.font.Font(None, 36)
+
     tmr = 0
     while True:
         for event in pg.event.get():
@@ -71,12 +73,12 @@ def main():
                 return
 
         # キーの押下状態リストを取得   
-        key_states = pg.key.get_pressed()
+        key_lst = pg.key.get_pressed()
 
         # 合計移動量を求める
         total_movement = [0, 0]
         for key, movement in move_dict.items():
-            if key_states[key]:
+            if key_lst[key]:
                 total_movement[0] += movement[0]
                 total_movement[1] += movement[1]
 
@@ -112,21 +114,21 @@ def main():
         # こうかとんと爆弾が衝突したらreturn
         if kk_rect.colliderect(bomb_rect):
             kk_img_collision = pg.image.load("ex02/fig/8.png")
+            kk_img_collision = pg.transform.rotozoom(kk_img_collision, 0, 2.0)
             screen.blit(bg_img, [0, 0])
             screen.blit(kk_img_collision, kk_rect.topleft)
-            #screen.blit(bomb_img_collision, bomb_rect.topleft)
             pg.display.update()
             pg.time.wait(1000)
             return
         
         # 飛ぶ方向に応じてこうかとんを切り替える
         for key, movement in move_dict.items():
-            if key_states[key]:
+            if key_lst[key]:
                 if movement[0] == 0 and movement[1] < 0:
                     kk_img = kk_img_up
                 elif movement[0] == 0 and movement[1] > 0:
                     kk_img = kk_img_down
-                elif movement[0] > 0:
+                if movement[0] > 0:
                     kk_img = kk_img_left
                 elif movement[0] < 0:
                     kk_img = kk_img_right
@@ -143,6 +145,10 @@ def main():
         screen.blit(bg_img, [0, 0])
         screen.blit(kk_img, kk_rect.topleft)
         screen.blit(bomb_img, bomb_rect.topleft)
+
+        time = tmr // 50  # 1フレームが1/50秒
+        text = font.render(f"Time: {time} seconds", True, (0, 0, 255))
+        screen.blit(text, (10, 10))
 
         pg.display.update()
         tmr += 1
