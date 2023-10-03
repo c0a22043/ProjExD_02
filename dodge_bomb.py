@@ -5,6 +5,24 @@ import random
 
 WIDTH, HEIGHT = 1600, 900
 
+delta = {  # 練習３：移動量辞書
+    pg.K_UP: (0, -5),
+    pg.K_DOWN: (0, +5),
+    pg.K_LEFT: (-5, 0),
+    pg.K_RIGHT: (+5, 0),
+}
+def check_bound(obj_rct: pg.Rect):
+    """
+    引数：こうかとんRectかばくだんRect
+    戻り値：タプル（横方向判定結果，縦方向判定結果）
+    画面内ならTrue，画面外ならFalse
+    """
+    yoko, tate = True, True
+    if obj_rct.left < 0 or WIDTH < obj_rct.right: # 横方向判定
+        yoko = False
+    if obj_rct.top < 0 or HEIGHT < obj_rct.bottom: # 縦方向判定
+        tate = False
+    return yoko, tate
 
 def main():
     # ウィンドウの初期化
@@ -36,7 +54,7 @@ def main():
             0 <= rect.bottom <= HEIGHT
         )
 
-    # 爆弾の画像のリストを生成
+    # 爆弾のリストを生成
     bomb_imgs = []
     for r in range(1, 11):
         bb_img = pg.Surface((20 * r, 20 * r), pg.SRCALPHA)
@@ -97,7 +115,8 @@ def main():
 
         # 爆弾とこうかとんの距離が500未満だったら，慣性として前の方向に移動させる
         if norm < 500:
-            avx, avy = vx * accs[min(tmr // 500, 9)] * normalized_vector[0], vy * accs[min(tmr // 500, 9)] * normalized_vector[1]
+            acceleration_factor = 1 + 0.01 * min(tmr // 500, 9)
+            avx, avy = vx * acceleration_factor * normalized_vector[0], vy * accs[min(tmr // 500, 9)] * normalized_vector[1]
             bomb_rect.move_ip(avx, avy)
             bomb_img = bomb_imgs[min(tmr // 500, 9)] # 新しい爆弾の大きさを反映
         else:
@@ -105,11 +124,13 @@ def main():
             bomb_rect.move_ip(avx, avy)
             bomb_img = bomb_imgs[min(tmr // 500, 9)] # 新しい爆弾の大きさを反映
 
-        # 爆弾が跳ね返る処理
-        if not is_inside_screen(bomb_rect):
-            vx = -vx
-            vy = -vy
-            bomb_rect.move_ip(vx, vy)
+        bomb_rect.move_ip(vx, vy)
+        yoko, tate = check_bound(bomb_rect)
+        if not yoko:  # 練習４：横方向にはみ出たら
+            vx *= -1
+        if not tate:  # 練習４：縦方向にはみ出たら
+            vy *= -1
+        screen.blit(bomb_img, bomb_rect)
         
         # こうかとんと爆弾が衝突したらreturn
         if kk_rect.colliderect(bomb_rect):
@@ -117,6 +138,9 @@ def main():
             kk_img_collision = pg.transform.rotozoom(kk_img_collision, 0, 2.0)
             screen.blit(bg_img, [0, 0])
             screen.blit(kk_img_collision, kk_rect.topleft)
+            time = tmr // 50  # 1フレームが1/50秒
+            text = font.render(f"Time: {time} seconds", True, (0, 0, 0))
+            screen.blit(text, (700, 100))
             pg.display.update()
             pg.time.wait(1000)
             return
@@ -146,6 +170,7 @@ def main():
         screen.blit(kk_img, kk_rect.topleft)
         screen.blit(bomb_img, bomb_rect.topleft)
 
+        # タイマー
         time = tmr // 50  # 1フレームが1/50秒
         text = font.render(f"Time: {time} seconds", True, (0, 0, 255))
         screen.blit(text, (10, 10))
