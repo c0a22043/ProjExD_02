@@ -135,7 +135,7 @@ def main():
         # こうかとんと爆弾が衝突したらreturn
         if kk_rect.colliderect(bomb_rect):
             kk_img_collision = pg.image.load("ex02/fig/8.png")
-            kk_img_collision = pg.transform.rotozoom(kk_img_collision, 0, 2.0)
+            kk_img_collision = pg.transform.rotozoom(kk_img_collision, 0, 3.0)
             screen.blit(bg_img, [0, 0])
             screen.blit(kk_img_collision, kk_rect.topleft)
             time = tmr // 50  # 1フレームが1/50秒
